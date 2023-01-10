@@ -1,14 +1,16 @@
 {
     "name": "Polyperfect.People",
     "references": [
-        "Polyperfect.Common"
+        "Polyperfect.Common",
+        "Unity.Formats.Fbx.Editor"
     ],
-    "optionalUnityReferences": [],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,
     "precompiledReferences": [],
     "autoReferenced": true,
-    "defineConstraints": []
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
 }
