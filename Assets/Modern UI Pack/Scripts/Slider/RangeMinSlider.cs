@@ -2,7 +2,7 @@
 using UnityEngine.UI;
 using TMPro;
 
-namespace Michsky.UI.ModernUIPack
+namespace Michsky.MUIP
 {
     public class RangeMinSlider : Slider
     {

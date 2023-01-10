@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-namespace Michsky.UI.ModernUIPack
+namespace Michsky.MUIP
 {
     [ExecuteInEditMode]
     public class UIManagerScrollbar : MonoBehaviour
@@ -15,41 +15,27 @@ namespace Michsky.UI.ModernUIPack
 
         void Awake()
         {
-            try
+            if (UIManagerAsset == null) { UIManagerAsset = Resources.Load<UIManager>("MUIP Manager"); }
+
+            this.enabled = true;
+
+            if (UIManagerAsset.enableDynamicUpdate == false)
             {
-                if (UIManagerAsset == null)
-                    UIManagerAsset = Resources.Load<UIManager>("MUIP Manager");
-
-                this.enabled = true;
-
-                if (UIManagerAsset.enableDynamicUpdate == false)
-                {
-                    UpdateScrollbar();
-                    this.enabled = false;
-                }
+                UpdateScrollbar();
+                this.enabled = false;
             }
-
-            catch { Debug.Log("<b>[Modern UI Pack]</b> No UI Manager found, assign it manually.", this); }
         }
 
-        void LateUpdate()
+        void Update()
         {
-            if (UIManagerAsset == null)
-                return;
-
-            if (UIManagerAsset.enableDynamicUpdate == true)
-                UpdateScrollbar();
+            if (UIManagerAsset == null) { return; }
+            if (UIManagerAsset.enableDynamicUpdate == true) { UpdateScrollbar(); }
         }
 
         void UpdateScrollbar()
         {
-            try
-            {
-                background.color = UIManagerAsset.scrollbarBackgroundColor;
-                bar.color = UIManagerAsset.scrollbarColor;
-            }
-
-            catch { }
+            background.color = UIManagerAsset.scrollbarBackgroundColor;
+            bar.color = UIManagerAsset.scrollbarColor;
         }
     }
 }

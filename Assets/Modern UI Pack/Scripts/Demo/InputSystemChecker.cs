@@ -5,7 +5,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.UI;
 #endif
 
-namespace Michsky.UI.ModernUIPack
+namespace Michsky.MUIP
 {
     public class InputSystemChecker : MonoBehaviour
     {

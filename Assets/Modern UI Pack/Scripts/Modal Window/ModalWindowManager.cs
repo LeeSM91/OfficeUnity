@@ -4,7 +4,7 @@ using UnityEngine.UI;
 using TMPro;
 using UnityEngine.Events;
 
-namespace Michsky.UI.ModernUIPack
+namespace Michsky.MUIP
 {
     [RequireComponent(typeof(CanvasGroup))]
     public class ModalWindowManager : MonoBehaviour
@@ -13,8 +13,8 @@ namespace Michsky.UI.ModernUIPack
         public Image windowIcon;
         public TextMeshProUGUI windowTitle;
         public TextMeshProUGUI windowDescription;
-        public Button confirmButton;
-        public Button cancelButton;
+        public ButtonManager confirmButton;
+        public ButtonManager cancelButton;
         public Animator mwAnimator;
 
         // Content
@@ -28,13 +28,19 @@ namespace Michsky.UI.ModernUIPack
         public UnityEvent onCancel;
 
         // Settings
-        public bool sharpAnimations = false;
-        public bool useCustomValues = false;
+        public bool useCustomContent = false;
         public bool isOn = false;
+        public bool closeOnCancel = true;
+        public bool closeOnConfirm = true;
+        public bool showCancelButton = true;
+        public bool showConfirmButton = true;
         public StartBehaviour startBehaviour = StartBehaviour.Disable;
         public CloseBehaviour closeBehaviour = CloseBehaviour.Disable;
 
-        public enum StartBehaviour { None, Disable }
+        // Helpers
+        float cachedStateLength;
+
+        public enum StartBehaviour { None, Disable, Enable }
         public enum CloseBehaviour { None, Disable, Destroy }
 
         void Awake()
@@ -42,76 +48,85 @@ namespace Michsky.UI.ModernUIPack
             isOn = false;
 
             if (mwAnimator == null) { mwAnimator = gameObject.GetComponent<Animator>(); }
+            if (closeOnCancel == true) { onCancel.AddListener(CloseWindow); }
+            if (closeOnConfirm == true) { onConfirm.AddListener(CloseWindow); }
             if (confirmButton != null) { confirmButton.onClick.AddListener(onConfirm.Invoke); }
             if (cancelButton != null) { cancelButton.onClick.AddListener(onCancel.Invoke); }
-            if (useCustomValues == false) { UpdateUI(); }
-            if (startBehaviour == StartBehaviour.Disable) { gameObject.SetActive(false); }
+            if (startBehaviour == StartBehaviour.Disable) { isOn = false; gameObject.SetActive(false); }
+            else if (startBehaviour == StartBehaviour.Enable) { isOn = false; OpenWindow(); }
+
+            cachedStateLength = MUIPInternalTools.GetAnimatorClipLength(mwAnimator, MUIPInternalTools.modalWindowStateName);
+            UpdateUI();
         }
 
         public void UpdateUI()
         {
-            try
-            {
-                windowIcon.sprite = icon;
-                windowTitle.text = titleText;
-                windowDescription.text = descriptionText;
-            }
+            if (useCustomContent == true)
+                return;
 
-            catch { Debug.LogWarning("<b>[Modal Window]</b> Cannot update the content due to missing variables.", this); }
+            if (windowIcon != null) { windowIcon.sprite = icon; }
+            if (windowTitle != null) { windowTitle.text = titleText; }
+            if (windowDescription != null) { windowDescription.text = descriptionText; }
+
+            if (showCancelButton == true && cancelButton != null) { cancelButton.gameObject.SetActive(true); }
+            else if (cancelButton != null) { cancelButton.gameObject.SetActive(false); }
+
+            if (showConfirmButton == true && confirmButton != null) { confirmButton.gameObject.SetActive(true); }
+            else if (confirmButton != null) { confirmButton.gameObject.SetActive(false); }
         }
 
-        public void OpenWindow()
+        public void Open()
         {
             if (isOn == false)
             {
                 StopCoroutine("DisableObject");
 
                 gameObject.SetActive(true);
-                onOpen.Invoke();
                 isOn = true;
-
-                if (sharpAnimations == false) { mwAnimator.CrossFade("Fade-in", 0.1f); }
-                else { mwAnimator.Play("Fade-in"); }
+                onOpen.Invoke();
+                mwAnimator.Play("Fade-in");
             }
         }
 
-        public void CloseWindow()
+        public void Close()
         {
             if (isOn == true)
             {
-                StartCoroutine("DisableObject");
                 isOn = false;
+                mwAnimator.Play("Fade-out");
 
-                if (sharpAnimations == false) { mwAnimator.CrossFade("Fade-out", 0.1f); }
-                else { mwAnimator.Play("Fade-out"); }
+                StartCoroutine("DisableObject");
             }
         }
+
+
+        // Obsolete
+        public void OpenWindow() { Open(); }
+        public void CloseWindow() { Close(); }
 
         public void AnimateWindow()
         {
             if (isOn == false)
             {
                 StopCoroutine("DisableObject");
-                gameObject.SetActive(true);
-                isOn = true;
 
-                if (sharpAnimations == false) { mwAnimator.CrossFade("Fade-in", 0.1f); }
-                else { mwAnimator.Play("Fade-in"); }
+                isOn = true;
+                gameObject.SetActive(true);
+                mwAnimator.Play("Fade-in");
             }
 
             else
             {
-                StartCoroutine("DisableObject");
                 isOn = false;
+                mwAnimator.Play("Fade-out");
 
-                if (sharpAnimations == false) { mwAnimator.CrossFade("Fade-out", 0.1f); }
-                else { mwAnimator.Play("Fade-out"); }
+                StartCoroutine("DisableObject");
             }
         }
 
         IEnumerator DisableObject()
         {
-            yield return new WaitForSeconds(1);
+            yield return new WaitForSecondsRealtime(cachedStateLength);
 
             if (closeBehaviour == CloseBehaviour.Disable) { gameObject.SetActive(false); }
             else if (closeBehaviour == CloseBehaviour.Destroy) { Destroy(gameObject); }

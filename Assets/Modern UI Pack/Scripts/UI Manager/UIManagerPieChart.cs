@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Michsky.UI.ModernUIPack
+namespace Michsky.MUIP
 {
     public class UIManagerPieChart : MonoBehaviour
     {

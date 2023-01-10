@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace Michsky.UI.ModernUIPack
+namespace Michsky.MUIP
 {
     [CreateAssetMenu(fileName = "New Icon Library", menuName = "Modern UI Pack/New Icon Library")]
     public class IconLibrary : ScriptableObject

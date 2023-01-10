@@ -2,97 +2,52 @@
 using UnityEngine.UI;
 using TMPro;
 
-namespace Michsky.UI.ModernUIPack
+namespace Michsky.MUIP
 {
     [ExecuteInEditMode]
     public class UIManagerDropdown : MonoBehaviour
     {
-        [Header("Settings")]
-        [SerializeField] private UIManager UIManagerAsset;
-        public bool overrideColors = false;
-        public bool overrideFonts = false;
+        [HideInInspector] public bool overrideColors = false;
+        [HideInInspector] public bool overrideFonts = false;
 
         [Header("Resources")]
+        [SerializeField] private UIManager UIManagerAsset;
         [SerializeField] private Image background;
         [SerializeField] private Image contentBackground;
         [SerializeField] private Image mainIcon;
         [SerializeField] private TextMeshProUGUI mainText;
         [SerializeField] private Image expandIcon;
-        CustomDropdown dropdownMain;
-        DropdownMultiSelect dropdownMulti;
 
         void Awake()
         {
-            try
+            if (UIManagerAsset == null) { UIManagerAsset = Resources.Load<UIManager>("MUIP Manager"); }
+
+            this.enabled = true;
+
+            if (UIManagerAsset.enableDynamicUpdate == false)
             {
-                dropdownMain = gameObject.GetComponent<CustomDropdown>();
-
-                if (dropdownMain == null) { dropdownMulti = gameObject.GetComponent<DropdownMultiSelect>(); }
-                if (UIManagerAsset == null) { UIManagerAsset = Resources.Load<UIManager>("MUIP Manager"); }
-
-                this.enabled = true;
-
-                if (UIManagerAsset.enableDynamicUpdate == false)
-                {
-                    UpdateDropdown();
-                    this.enabled = false;
-                }
+                UpdateDropdown();
+                this.enabled = false;
             }
-
-            catch { Debug.Log("<b>[Modern UI Pack]</b> No UI Manager found, assign it manually.", this); }
         }
 
-        void LateUpdate()
+        void Update()
         {
-            if (UIManagerAsset == null)
-                return;
-
-            if (UIManagerAsset.enableDynamicUpdate == true)
-                UpdateDropdown();
+            if (UIManagerAsset == null) { return; }
+            if (UIManagerAsset.enableDynamicUpdate == true) { UpdateDropdown(); }
         }
 
         void UpdateDropdown()
         {
-            try
+            if (overrideFonts == false && mainText != null) { mainText.font = UIManagerAsset.dropdownFont; }
+            if (overrideColors == false)
             {
-                if (UIManagerAsset.buttonThemeType == UIManager.ButtonThemeType.Basic)
-                {
-                    if (overrideColors == false)
-                    {
-                        background.color = UIManagerAsset.dropdownColor;
-                        contentBackground.color = UIManagerAsset.dropdownColor;
-                        mainIcon.color = UIManagerAsset.dropdownTextColor;
-                        mainText.color = UIManagerAsset.dropdownTextColor;
-                        expandIcon.color = UIManagerAsset.dropdownTextColor;
-                    }
-
-                    if (overrideFonts == false)
-                    {
-                        mainText.font = UIManagerAsset.dropdownFont;
-                        mainText.fontSize = UIManagerAsset.dropdownFontSize;
-                    }
-                }
-
-                else if (UIManagerAsset.buttonThemeType == UIManager.ButtonThemeType.Custom)
-                {
-                    if (overrideColors == false)
-                    {
-                        background.color = UIManagerAsset.dropdownColor;
-                        contentBackground.color = UIManagerAsset.dropdownColor;
-                        mainIcon.color = UIManagerAsset.dropdownIconColor;
-                        mainText.color = UIManagerAsset.dropdownTextColor;
-                        expandIcon.color = UIManagerAsset.dropdownIconColor;
-                    }
-
-                    if (overrideFonts == false)
-                    {
-                        mainText.font = UIManagerAsset.dropdownFont;
-                        mainText.fontSize = UIManagerAsset.dropdownFontSize;
-                    }
-                }
+                if (background != null) { background.color = UIManagerAsset.dropdownBackgroundColor; }
+                if (contentBackground != null) { contentBackground.color = UIManagerAsset.dropdownContentBackgroundColor; }
+                if (mainIcon != null) { mainIcon.color = UIManagerAsset.dropdownPrimaryColor; }
+                if (mainText != null) { mainText.color = UIManagerAsset.dropdownPrimaryColor; }
+                if (expandIcon != null) { expandIcon.color = UIManagerAsset.dropdownPrimaryColor; }
             }
-
-            catch { }
         }
     }
 }

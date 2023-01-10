@@ -9,7 +9,7 @@ using TMPro;
 using UnityEngine.InputSystem;
 #endif
 
-namespace Michsky.UI.ModernUIPack
+namespace Michsky.MUIP
 {
     [AddComponentMenu("Modern UI Pack/Context Menu/Context Menu Content")]
     public class ContextMenuContent : MonoBehaviour, IPointerClickHandler
@@ -24,7 +24,6 @@ namespace Michsky.UI.ModernUIPack
         // Items
         public List<ContextItem> contexItems = new List<ContextItem>();
 
-        Animator contextAnimator;
         GameObject selectedItem;
         Image setItemImage;
         TextMeshProUGUI setItemText;
@@ -71,17 +70,13 @@ namespace Michsky.UI.ModernUIPack
                 catch { Debug.LogError("<b>[Context Menu]</b> Context Manager is missing.", this); return; }
             }
 
-            contextAnimator = contextManager.contextAnimator;
-
             foreach (Transform child in itemParent)
                 Destroy(child.gameObject);
         }
 
-        void ProcessClick()
+        public void ProcessContent()
         {
-            foreach (Transform child in itemParent)
-                Destroy(child.gameObject);
-
+            foreach (Transform child in itemParent) { Destroy(child.gameObject); }
             for (int i = 0; i < contexItems.Count; ++i)
             {
                 bool nulLVariable = false;
@@ -121,7 +116,7 @@ namespace Michsky.UI.ModernUIPack
 
                             Button itemButton = go.GetComponent<Button>();
                             itemButton.onClick.AddListener(contexItems[i].onClick.Invoke);
-                            itemButton.onClick.AddListener(CloseOnClick);
+                            itemButton.onClick.AddListener(contextManager.Close);
                         }
                     }
 
@@ -152,15 +147,13 @@ namespace Michsky.UI.ModernUIPack
             }
 
             contextManager.SetContextMenuPosition();
-            contextAnimator.Play("Menu In");
-            contextManager.isOn = true;
-            contextManager.SetContextMenuPosition();
+            contextManager.Open();
         }
 
         public void OnPointerClick(PointerEventData eventData)
         {
-            if (contextManager.isOn == true) { contextAnimator.Play("Menu Out"); contextManager.isOn = false; }
-            else if (eventData.button == PointerEventData.InputButton.Right && contextManager.isOn == false) { ProcessClick(); }
+            if (contextManager.isOn == true) { contextManager.Close(); }
+            else if (eventData.button == PointerEventData.InputButton.Right && contextManager.isOn == false) { ProcessContent(); }
         }
 
         IEnumerator ExecuteAfterTime(float time)
@@ -178,14 +171,8 @@ namespace Michsky.UI.ModernUIPack
             if (useIn3D == true && Mouse.current.rightButton.wasPressedThisFrame)
 #endif
             {
-                ProcessClick();
+                ProcessContent();
             }
-        }
-
-        public void CloseOnClick()
-        {
-            contextAnimator.Play("Menu Out");
-            contextManager.isOn = false;
         }
 
         public void AddNewItem()

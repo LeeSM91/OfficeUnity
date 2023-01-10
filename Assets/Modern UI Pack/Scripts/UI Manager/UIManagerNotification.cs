@@ -2,15 +2,15 @@
 using UnityEngine.UI;
 using TMPro;
 
-namespace Michsky.UI.ModernUIPack
+namespace Michsky.MUIP
 {
     [ExecuteInEditMode]
     public class UIManagerNotification : MonoBehaviour
     {
         [Header("Settings")]
         [SerializeField] private UIManager UIManagerAsset;
-        public bool overrideColors = false;
-        public bool overrideFonts = false;
+        [HideInInspector] public bool overrideColors = false;
+        [HideInInspector] public bool overrideFonts = false;
 
         [Header("Resources")]
         [SerializeField] private Image background;
@@ -20,53 +20,40 @@ namespace Michsky.UI.ModernUIPack
 
         void Awake()
         {
-            try
+            if (UIManagerAsset == null) { UIManagerAsset = Resources.Load<UIManager>("MUIP Manager"); }
+
+            this.enabled = true;
+
+            if (UIManagerAsset.enableDynamicUpdate == false)
             {
-                if (UIManagerAsset == null) { UIManagerAsset = Resources.Load<UIManager>("MUIP Manager"); }
-
-                this.enabled = true;
-
-                if (UIManagerAsset.enableDynamicUpdate == false)
-                {
-                    UpdateNotification();
-                    this.enabled = false;
-                }
+                UpdateNotification();
+                this.enabled = false;
             }
-
-            catch { Debug.Log("<b>[Modern UI Pack]</b> No UI Manager found, assign it manually.", this); }
         }
 
-        void LateUpdate()
+        void Update()
         {
-            if (UIManagerAsset == null)
-                return;
-
-            if (UIManagerAsset.enableDynamicUpdate == true)
-                UpdateNotification();
+            if (UIManagerAsset == null) { return; }
+            if (UIManagerAsset.enableDynamicUpdate == true) { UpdateNotification(); }
         }
 
         void UpdateNotification()
         {
-            try
+            if (overrideColors == false)
             {
-                if (overrideColors == false)
-                {
-                    background.color = UIManagerAsset.notificationBackgroundColor;
-                    icon.color = UIManagerAsset.notificationIconColor;
-                    title.color = UIManagerAsset.notificationTitleColor;
-                    description.color = UIManagerAsset.notificationDescriptionColor;
-                }
-
-                if (overrideFonts == false)
-                {
-                    title.font = UIManagerAsset.notificationTitleFont;
-                    title.fontSize = UIManagerAsset.notificationTitleFontSize;
-                    description.font = UIManagerAsset.notificationDescriptionFont;
-                    description.fontSize = UIManagerAsset.notificationDescriptionFontSize;
-                }
+                background.color = UIManagerAsset.notificationBackgroundColor;
+                icon.color = UIManagerAsset.notificationIconColor;
+                title.color = UIManagerAsset.notificationTitleColor;
+                description.color = UIManagerAsset.notificationDescriptionColor;
             }
 
-            catch { }
+            if (overrideFonts == false)
+            {
+                title.font = UIManagerAsset.notificationTitleFont;
+                title.fontSize = UIManagerAsset.notificationTitleFontSize;
+                description.font = UIManagerAsset.notificationDescriptionFont;
+                description.fontSize = UIManagerAsset.notificationDescriptionFontSize;
+            }
         }
     }
 }

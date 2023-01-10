@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
-namespace Michsky.UI.ModernUIPack
+namespace Michsky.MUIP
 {
     public class DemoListShadow : MonoBehaviour, IBeginDragHandler
     {

@@ -4,7 +4,7 @@ using UnityEditor;
 using System;
 using UnityEngine.UI;
 
-namespace Michsky.UI.ModernUIPack
+namespace Michsky.MUIP
 {
     [CustomEditor(typeof(UIManagerProgressBarLoop))]
     public class UIManagerProgressBarLoopEditor : Editor

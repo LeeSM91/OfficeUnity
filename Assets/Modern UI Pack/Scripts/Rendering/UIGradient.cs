@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Michsky.UI.ModernUIPack
+namespace Michsky.MUIP
 {
+    [DisallowMultipleComponent]
     [AddComponentMenu("Modern UI Pack/Effects/UI Gradient")]
     public class UIGradient : BaseMeshEffect
     {

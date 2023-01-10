@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-namespace Michsky.UI.ModernUIPack
+namespace Michsky.MUIP
 {
     [ExecuteInEditMode]
     public class UIManagerProgressBarLoop : MonoBehaviour
@@ -18,47 +18,34 @@ namespace Michsky.UI.ModernUIPack
 
         void Awake()
         {
-            try
+            if (UIManagerAsset == null) { UIManagerAsset = Resources.Load<UIManager>("MUIP Manager"); }
+
+            this.enabled = true;
+
+            if (UIManagerAsset.enableDynamicUpdate == false)
             {
-                if (UIManagerAsset == null) { UIManagerAsset = Resources.Load<UIManager>("MUIP Manager"); }
-
-                this.enabled = true;
-
-                if (UIManagerAsset.enableDynamicUpdate == false)
-                {
-                    UpdateProgressBar();
-                    this.enabled = false;
-                }
+                UpdateProgressBar();
+                this.enabled = false;
             }
-
-            catch { Debug.Log("<b>[Modern UI Pack]</b> No UI Manager found, assign it manually.", this); }
         }
 
-        void LateUpdate()
+        void Update()
         {
-            if (UIManagerAsset == null)
-                return;
-
-            if (UIManagerAsset.enableDynamicUpdate == true)
-                UpdateProgressBar();
+            if (UIManagerAsset == null) { return; }
+            if (UIManagerAsset.enableDynamicUpdate == true) { UpdateProgressBar(); }
         }
 
         void UpdateProgressBar()
         {
             if (overrideColors == false)
             {
-                try
+                bar.color = UIManagerAsset.progressBarColor;
+
+                if (hasBackground == true)
                 {
-                    bar.color = UIManagerAsset.progressBarColor;
-
-                    if (hasBackground == true)
-                    {
-                        if (useRegularBackground == true) { background.color = UIManagerAsset.progressBarBackgroundColor; }
-                        else { background.color = UIManagerAsset.progressBarLoopBackgroundColor; }
-                    }
+                    if (useRegularBackground == true) { background.color = UIManagerAsset.progressBarBackgroundColor; }
+                    else { background.color = UIManagerAsset.progressBarLoopBackgroundColor; }
                 }
-
-                catch { }
             }
         }
     }

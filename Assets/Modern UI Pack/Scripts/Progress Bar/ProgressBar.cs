@@ -3,7 +3,7 @@ using UnityEngine.UI;
 using UnityEngine.Events;
 using TMPro;
 
-namespace Michsky.UI.ModernUIPack
+namespace Michsky.MUIP
 {
     public class ProgressBar : MonoBehaviour
     {

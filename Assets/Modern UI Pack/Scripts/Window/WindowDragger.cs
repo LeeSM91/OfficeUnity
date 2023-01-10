@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace Michsky.UI.ModernUIPack
+namespace Michsky.MUIP
 {
     public class WindowDragger : UIBehaviour, IBeginDragHandler, IDragHandler
     {
@@ -10,14 +10,14 @@ namespace Michsky.UI.ModernUIPack
         public RectTransform dragObject;
 
         [Header("Settings")]
-        public bool topOnClick = true;
+        public bool topOnDrag = true;
 
         private Vector2 originalLocalPointerPosition;
         private Vector3 originalPanelLocalPosition;
 
         public new void Start()
         {
-            if(dragArea == null)
+            if (dragArea == null)
             {
                 try
                 {
@@ -25,10 +25,7 @@ namespace Michsky.UI.ModernUIPack
                     dragArea = canvas.GetComponent<RectTransform>();
                 }
 
-                catch
-                {
-                    Debug.LogError("Movable Window - Drag Area has not been assigned.");
-                }
+                catch { Debug.LogError("<b>[Movable Window]</b> Drag Area has not been assigned."); }
             }
         }
 
@@ -36,10 +33,8 @@ namespace Michsky.UI.ModernUIPack
         {
             get
             {
-                if (dragObject == null)
-                    return (transform as RectTransform);
-                else
-                    return dragObject;
+                if (dragObject == null) { return (transform as RectTransform); }
+                else { return dragObject; }
             }
         }
 
@@ -50,14 +45,10 @@ namespace Michsky.UI.ModernUIPack
                 if (dragArea == null)
                 {
                     RectTransform canvas = transform as RectTransform;
-                    while (canvas.parent != null && canvas.parent is RectTransform)
-                    {
-                        canvas = canvas.parent as RectTransform;
-                    }
+                    while (canvas.parent != null && canvas.parent is RectTransform) { canvas = canvas.parent as RectTransform; }
                     return canvas;
                 }
-                else
-                    return dragArea;
+                else { return dragArea; }
             }
         }
 
@@ -66,14 +57,13 @@ namespace Michsky.UI.ModernUIPack
             originalPanelLocalPosition = DragObjectInternal.localPosition;
             RectTransformUtility.ScreenPointToLocalPointInRectangle(DragAreaInternal, data.position, data.pressEventCamera, out originalLocalPointerPosition);
             gameObject.transform.SetAsLastSibling();
-
-            if (topOnClick == true)
-                dragObject.transform.SetAsLastSibling();
+            if (topOnDrag == true) { dragObject.transform.SetAsLastSibling(); }
         }
 
         public void OnDrag(PointerEventData data)
         {
             Vector2 localPointerPosition;
+
             if (RectTransformUtility.ScreenPointToLocalPointInRectangle(DragAreaInternal, data.position, data.pressEventCamera, out localPointerPosition))
             {
                 Vector3 offsetToOriginal = localPointerPosition - originalLocalPointerPosition;

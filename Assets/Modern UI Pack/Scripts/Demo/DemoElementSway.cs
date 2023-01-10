@@ -6,7 +6,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 #endif
 
-namespace Michsky.UI.ModernUIPack
+namespace Michsky.MUIP
 {
     public class DemoElementSway : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
     {
@@ -55,7 +55,8 @@ namespace Michsky.UI.ModernUIPack
 #endif
 
             if (mainCanvas.renderMode == RenderMode.ScreenSpaceOverlay) { ProcessOverlay(); }
-            else if (mainCanvas.renderMode == RenderMode.ScreenSpaceCamera || mainCanvas.renderMode == RenderMode.WorldSpace) { ProcessSSC(); }
+            else if (mainCanvas.renderMode == RenderMode.ScreenSpaceCamera) { ProcessSSC(); }
+            else if (mainCanvas.renderMode == RenderMode.WorldSpace) { ProcessWorldSpace(); }
         }
 
         void ProcessOverlay()
@@ -68,6 +69,16 @@ namespace Michsky.UI.ModernUIPack
         {
             if (allowSway == true) { swayObject.position = Vector2.Lerp(swayObject.position, Camera.main.ScreenToWorldPoint(cursorPos), Time.deltaTime * smoothness); }
             else { swayObject.localPosition = Vector2.Lerp(swayObject.localPosition, defaultPos, Time.deltaTime * smoothness); }
+        }
+
+        void ProcessWorldSpace()
+        {
+            if (allowSway == true) 
+            {
+                Vector3 clampedPos = new Vector3(cursorPos.x, cursorPos.y, (mainCanvas.transform.position.z / 6f));
+                swayObject.position = Vector3.Lerp(swayObject.position, Camera.main.ScreenToWorldPoint(clampedPos), Time.deltaTime * smoothness);
+            }
+            else { swayObject.localPosition = Vector3.Lerp(swayObject.localPosition, defaultPos, Time.deltaTime * smoothness); }
         }
 
         public void Dissolve()

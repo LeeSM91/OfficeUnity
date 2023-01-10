@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Michsky.UI.ModernUIPack
+namespace Michsky.MUIP
 {
     [RequireComponent(typeof(Toggle))]
     [RequireComponent(typeof(Animator))]
@@ -13,43 +13,62 @@ namespace Michsky.UI.ModernUIPack
 
         [Header("Settings")]
         public bool invokeOnAwake;
+        bool isInitialized = false;
 
         void Awake()
         {
             if (toggleObject == null) { toggleObject = gameObject.GetComponent<Toggle>(); }
             if (toggleAnimator == null) { toggleAnimator = toggleObject.GetComponent<Animator>(); }
-
-            toggleObject.onValueChanged.AddListener(UpdateStateDynamic);
-            UpdateState();
-
             if (invokeOnAwake == true) { toggleObject.onValueChanged.Invoke(toggleObject.isOn); }
+
+            toggleObject.onValueChanged.AddListener(UpdateState);
+            UpdateState();
+            isInitialized = true;
+        }
+
+        void OnEnable()
+        {
+            if (isInitialized == false)
+                return;
+
+            UpdateState();
         }
 
         public void UpdateState()
         {
-            StopCoroutine("DisableAnimator");
+            if (gameObject.activeInHierarchy == true) 
+            { 
+                StopCoroutine("DisableAnimator"); 
+                StartCoroutine("DisableAnimator"); 
+            }
+
+            else { return; }
+
             toggleAnimator.enabled = true;
 
             if (toggleObject.isOn) { toggleAnimator.Play("On Instant"); }
             else { toggleAnimator.Play("Off Instant"); }
-
-            StartCoroutine("DisableAnimator");
         }
 
-        public void UpdateStateDynamic(bool value)
+        public void UpdateState(bool value)
         {
-            StopCoroutine("DisableAnimator");
+            if (gameObject.activeInHierarchy == true)
+            {
+                StopCoroutine("DisableAnimator");
+                StartCoroutine("DisableAnimator");
+            }
+
+            else { return; }
+
             toggleAnimator.enabled = true;
 
             if (toggleObject.isOn) { toggleAnimator.Play("Toggle On"); }
             else { toggleAnimator.Play("Toggle Off"); }
-
-            StartCoroutine("DisableAnimator");
         }
 
         IEnumerator DisableAnimator()
         {
-            yield return new WaitForSeconds(0.5f);
+            yield return new WaitForSecondsRealtime(0.6f);
             toggleAnimator.enabled = false;
         }
     }

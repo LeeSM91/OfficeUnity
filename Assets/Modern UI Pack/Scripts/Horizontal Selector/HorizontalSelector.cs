@@ -5,7 +5,7 @@ using UnityEngine.UI;
 using UnityEngine.Events;
 using TMPro;
 
-namespace Michsky.UI.ModernUIPack
+namespace Michsky.MUIP
 {
     [RequireComponent(typeof(Animator))]
     public class HorizontalSelector : MonoBehaviour
@@ -24,8 +24,8 @@ namespace Michsky.UI.ModernUIPack
 
         // Saving
         public bool enableIcon = true;
-        public bool saveValue = false;
-        public string selectorTag = "Tag Text";
+        public bool saveSelected = false;
+        public string saveKey = "My Selector";
 
         // Settings
         public bool enableIndicators = true;
@@ -38,10 +38,13 @@ namespace Michsky.UI.ModernUIPack
         [HideInInspector] public int index = 0;
 
         // Items
-        public List<Item> itemList = new List<Item>();
-        [System.Serializable]
-        public class SelectorEvent : UnityEvent<int> { }
-        [Space(8)] public SelectorEvent onValueChanged;
+        public List<Item> items = new List<Item>();
+
+        // Events
+        [System.Serializable] public class SelectorEvent : UnityEvent<int> { }
+        public SelectorEvent onValueChanged;
+        [System.Serializable] public class ItemTextChangedEvent : UnityEvent<TMP_Text> { }
+        public ItemTextChangedEvent onItemTextChanged;
 
         [System.Serializable]
         public class Item
@@ -65,7 +68,7 @@ namespace Michsky.UI.ModernUIPack
 
             if (invokeAtStart == true)
             {
-                itemList[index].onItemSelect.Invoke();
+                items[index].onItemSelect.Invoke();
                 onValueChanged.Invoke(index);
             }
         }
@@ -77,23 +80,22 @@ namespace Michsky.UI.ModernUIPack
 
         public void SetupSelector()
         {
-            if (itemList.Count == 0)
+            if (items.Count == 0)
                 return;
 
-            if (saveValue == true)
+            if (saveSelected == true)
             {
-                if (PlayerPrefs.HasKey("HorizontalSelector" + selectorTag) == true)
-                    defaultIndex = PlayerPrefs.GetInt("HorizontalSelector" + selectorTag);
-                else
-                    PlayerPrefs.SetInt("HorizontalSelector" + selectorTag, defaultIndex);
+                if (PlayerPrefs.HasKey("HorizontalSelector_" + saveKey) == true) { defaultIndex = PlayerPrefs.GetInt("HorizontalSelector_" + saveKey); }
+                else { PlayerPrefs.SetInt("HorizontalSelector_" + saveKey, defaultIndex); }
             }
 
-            label.text = itemList[defaultIndex].itemTitle;
+            label.text = items[defaultIndex].itemTitle;
             labelHelper.text = label.text;
+            onItemTextChanged?.Invoke(label);
 
             if (labelIcon != null && enableIcon == true)
             {
-                labelIcon.sprite = itemList[defaultIndex].itemIcon;
+                labelIcon.sprite = items[defaultIndex].itemIcon;
                 labelIconHelper.sprite = labelIcon.sprite;
             }
 
@@ -109,8 +111,11 @@ namespace Michsky.UI.ModernUIPack
             else { Destroy(indicatorParent.gameObject); }
         }
 
-        public void PreviousClick()
+        public void PreviousItem()
         {
+            if (items.Count == 0)
+                return;
+
             StopCoroutine("DisableAnimator");
             selectorAnimator.enabled = true;
 
@@ -121,13 +126,14 @@ namespace Michsky.UI.ModernUIPack
                     labelHelper.text = label.text;
                     if (labelIcon != null && enableIcon == true) { labelIconHelper.sprite = labelIcon.sprite; }
 
-                    if (index == 0) { index = itemList.Count - 1; }
+                    if (index == 0) { index = items.Count - 1; }
                     else { index--; }
 
-                    label.text = itemList[index].itemTitle;
-                    if (labelIcon != null && enableIcon == true) { labelIcon.sprite = itemList[index].itemIcon; }
+                    label.text = items[index].itemTitle;
+                    onItemTextChanged?.Invoke(label);
+                    if (labelIcon != null && enableIcon == true) { labelIcon.sprite = items[index].itemIcon; }
 
-                    itemList[index].onItemSelect.Invoke();
+                    items[index].onItemSelect.Invoke();
                     onValueChanged.Invoke(index);
                    
                     selectorAnimator.Play(null);
@@ -135,8 +141,6 @@ namespace Michsky.UI.ModernUIPack
 
                     if (invertAnimation == true) { selectorAnimator.Play("Forward"); }
                     else { selectorAnimator.Play("Previous"); }
-
-                    if (saveValue == true) { PlayerPrefs.SetInt("HorizontalSelector" + selectorTag, index); }
                 }
             }
 
@@ -145,13 +149,14 @@ namespace Michsky.UI.ModernUIPack
                 labelHelper.text = label.text;
                 if (labelIcon != null && enableIcon == true) { labelIconHelper.sprite = labelIcon.sprite; }
 
-                if (index == 0) { index = itemList.Count - 1; }
+                if (index == 0) { index = items.Count - 1; }
                 else { index--; }
 
-                label.text = itemList[index].itemTitle;
-                if (labelIcon != null && enableIcon == true) { labelIcon.sprite = itemList[index].itemIcon; }
+                label.text = items[index].itemTitle;
+                onItemTextChanged?.Invoke(label);
+                if (labelIcon != null && enableIcon == true) { labelIcon.sprite = items[index].itemIcon; }
 
-                itemList[index].onItemSelect.Invoke();
+                items[index].onItemSelect.Invoke();
                 onValueChanged.Invoke(index);
                 
                 selectorAnimator.Play(null);
@@ -159,15 +164,12 @@ namespace Michsky.UI.ModernUIPack
 
                 if (invertAnimation == true) { selectorAnimator.Play("Forward"); }
                 else { selectorAnimator.Play("Previous"); }
-
-                if (saveValue == true) { PlayerPrefs.SetInt("HorizontalSelector" + selectorTag, index); }
             }
 
-            if (saveValue == true) { PlayerPrefs.SetInt("HorizontalSelector" + selectorTag, index); }
-
+            if (saveSelected == true) { PlayerPrefs.SetInt("HorizontalSelector_" + saveKey, index); }
             if (enableIndicators == true)
             {
-                for (int i = 0; i < itemList.Count; ++i)
+                for (int i = 0; i < items.Count; ++i)
                 {
                     GameObject go = indicatorParent.GetChild(i).gameObject;
                     Transform onObj = go.transform.Find("On");
@@ -178,28 +180,32 @@ namespace Michsky.UI.ModernUIPack
                 }
             }
 
-            StartCoroutine("DisableAnimator");
+            if (gameObject.activeInHierarchy == true) { StartCoroutine("DisableAnimator"); }
         }
 
-        public void ForwardClick()
+        public void NextItem()
         {
+            if (items.Count == 0)
+                return;
+
             StopCoroutine("DisableAnimator");
             selectorAnimator.enabled = true;
 
             if (loopSelection == false)
             {
-                if (index != itemList.Count - 1)
+                if (index != items.Count - 1)
                 {
                     labelHelper.text = label.text;
                     if (labelIcon != null && enableIcon == true) { labelIconHelper.sprite = labelIcon.sprite; }
 
-                    if ((index + 1) >= itemList.Count) { index = 0; }
+                    if ((index + 1) >= items.Count) { index = 0; }
                     else { index++; }
 
-                    label.text = itemList[index].itemTitle;
-                    if (labelIcon != null && enableIcon == true) { labelIcon.sprite = itemList[index].itemIcon; }
+                    label.text = items[index].itemTitle;
+                    onItemTextChanged?.Invoke(label);
+                    if (labelIcon != null && enableIcon == true) { labelIcon.sprite = items[index].itemIcon; }
 
-                    itemList[index].onItemSelect.Invoke();
+                    items[index].onItemSelect.Invoke();
                     onValueChanged.Invoke(index);
                    
                     selectorAnimator.Play(null);
@@ -207,8 +213,6 @@ namespace Michsky.UI.ModernUIPack
 
                     if (invertAnimation == true) { selectorAnimator.Play("Previous"); }
                     else { selectorAnimator.Play("Forward"); }
-
-                    if (saveValue == true) { PlayerPrefs.SetInt("HorizontalSelector" + selectorTag, index); }
                 }
             }
 
@@ -217,13 +221,14 @@ namespace Michsky.UI.ModernUIPack
                 labelHelper.text = label.text;
                 if (labelIcon != null && enableIcon == true) { labelIconHelper.sprite = labelIcon.sprite; }
 
-                if ((index + 1) >= itemList.Count) { index = 0; }
+                if ((index + 1) >= items.Count) { index = 0; }
                 else { index++; }
 
-                label.text = itemList[index].itemTitle;
-                if (labelIcon != null && enableIcon == true) { labelIcon.sprite = itemList[index].itemIcon; }
+                label.text = items[index].itemTitle;
+                onItemTextChanged?.Invoke(label);
+                if (labelIcon != null && enableIcon == true) { labelIcon.sprite = items[index].itemIcon; }
 
-                itemList[index].onItemSelect.Invoke();
+                items[index].onItemSelect.Invoke();
                 onValueChanged.Invoke(index);
                
                 selectorAnimator.Play(null);
@@ -231,15 +236,12 @@ namespace Michsky.UI.ModernUIPack
 
                 if (invertAnimation == true) { selectorAnimator.Play("Previous"); }
                 else { selectorAnimator.Play("Forward"); }
-
-                if (saveValue == true) { PlayerPrefs.SetInt("HorizontalSelector" + selectorTag, index); }
             }
 
-            if (saveValue == true) { PlayerPrefs.SetInt("HorizontalSelector" + selectorTag, index); }
-
+            if (saveSelected == true) { PlayerPrefs.SetInt("HorizontalSelector_" + saveKey, index); }
             if (enableIndicators == true)
             {
-                for (int i = 0; i < itemList.Count; ++i)
+                for (int i = 0; i < items.Count; ++i)
                 {
                     GameObject go = indicatorParent.GetChild(i).gameObject;
                     Transform onObj = go.transform.Find("On"); ;
@@ -250,36 +252,44 @@ namespace Michsky.UI.ModernUIPack
                 }
             }
 
-            StartCoroutine("DisableAnimator");
+            if (gameObject.activeInHierarchy == true) { StartCoroutine("DisableAnimator"); }
         }
+
+        // Obsolete
+        public void PreviousClick() { PreviousItem(); }
+        public void ForwardClick() { NextItem(); }
 
         public void CreateNewItem(string title)
         {
             Item item = new Item();
             newItemTitle = title;
             item.itemTitle = newItemTitle;
-            itemList.Add(item);
+            items.Add(item);
+        }
+
+        public void CreateNewItem(string title, Sprite icon)
+        {
+            Item item = new Item();
+            newItemTitle = title;
+            item.itemTitle = newItemTitle;
+            item.itemIcon = icon;
+            items.Add(item);
         }
 
         public void RemoveItem(string itemTitle)
         {
-            var item = itemList.Find(x => x.itemTitle == itemTitle);
-            itemList.Remove(item);
+            var item = items.Find(x => x.itemTitle == itemTitle);
+            items.Remove(item);
             SetupSelector();
-        }
-
-        public void AddNewItem()
-        {
-            Item item = new Item();
-            itemList.Add(item);
         }
 
         public void UpdateUI()
         {
             selectorAnimator.enabled = true;
 
-            label.text = itemList[index].itemTitle;
-            if (labelIcon != null && enableIcon == true) { labelIcon.sprite = itemList[index].itemIcon; }
+            label.text = items[index].itemTitle;
+            onItemTextChanged?.Invoke(label);
+            if (labelIcon != null && enableIcon == true) { labelIcon.sprite = items[index].itemIcon; }
 
             UpdateContentLayout();
             UpdateIndicators();
@@ -291,14 +301,12 @@ namespace Michsky.UI.ModernUIPack
             if (enableIndicators == false)
                 return;
 
-            foreach (Transform child in indicatorParent)
-                Destroy(child.gameObject);
-
-            for (int i = 0; i < itemList.Count; ++i)
+            foreach (Transform child in indicatorParent) { Destroy(child.gameObject); }
+            for (int i = 0; i < items.Count; ++i)
             {
                 GameObject go = Instantiate(indicatorObject, new Vector3(0, 0, 0), Quaternion.identity) as GameObject;
                 go.transform.SetParent(indicatorParent, false);
-                go.name = itemList[i].itemTitle;
+                go.name = items[i].itemTitle;
                 
                 Transform onObj = go.transform.Find("On");
                 Transform offObj = go.transform.Find("Off");
@@ -318,6 +326,7 @@ namespace Michsky.UI.ModernUIPack
                 labelIconHelper.transform.localScale = new Vector3(iconScale, iconScale, iconScale);
             }
 
+            LayoutRebuilder.ForceRebuildLayoutImmediate(label.transform.GetComponent<RectTransform>());
             LayoutRebuilder.ForceRebuildLayoutImmediate(label.transform.parent.GetComponent<RectTransform>());
         }
 

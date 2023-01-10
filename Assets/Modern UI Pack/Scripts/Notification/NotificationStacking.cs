@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Michsky.UI.ModernUIPack
+namespace Michsky.MUIP
 {
     [AddComponentMenu("Modern UI Pack/Notification/Notification Stacking")]
     public class NotificationStacking : MonoBehaviour

@@ -4,7 +4,7 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using TMPro;
 
-namespace Michsky.UI.ModernUIPack
+namespace Michsky.MUIP
 {
     public class ContextMenuSubMenu : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
     {
@@ -99,10 +99,11 @@ namespace Michsky.UI.ModernUIPack
 
             if (cmManager.autoSubMenuPosition == true)
             {
-                if (cmManager.bottomLeft == true) { listParent.pivot = new Vector2(0f, listParent.pivot.y); }
-                if (cmManager.bottomRight == true) { listParent.pivot = new Vector2(1f, listParent.pivot.y); }
-                if (cmManager.topLeft == true) { listParent.pivot = new Vector2(listParent.pivot.x, 0f); }
-                if (cmManager.topRight == true) { listParent.pivot = new Vector2(listParent.pivot.x, 1f); }
+                if (cmManager.horizontalBound == ContextMenuManager.CursorBoundHorizontal.Left) { listParent.pivot = new Vector2(0f, listParent.pivot.y); }
+                else if (cmManager.horizontalBound == ContextMenuManager.CursorBoundHorizontal.Right) { listParent.pivot = new Vector2(1f, listParent.pivot.y); }
+               
+                if (cmManager.verticalBound == ContextMenuManager.CursorBoundVertical.Top) { listParent.pivot = new Vector2(listParent.pivot.x, 0f); }
+                else if (cmManager.verticalBound == ContextMenuManager.CursorBoundVertical.Bottom) { listParent.pivot = new Vector2(listParent.pivot.x, 1f); }
             }
 
             if (cmManager.subMenuBehaviour == ContextMenuManager.SubMenuBehaviour.Hover)

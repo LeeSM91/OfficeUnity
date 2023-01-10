@@ -3,11 +3,11 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using TMPro;
-#if ENABLE_INPUT_SYSTEM
+#if !ENABLE_LEGACY_INPUT_MANAGER
 using UnityEngine.InputSystem;
 #endif
 
-namespace Michsky.UI.ModernUIPack
+namespace Michsky.MUIP
 {
     [RequireComponent(typeof(TMP_InputField))]
     [RequireComponent(typeof(Animator))]
@@ -19,11 +19,13 @@ namespace Michsky.UI.ModernUIPack
 
         [Header("Settings")]
         public bool processSubmit = false;
+        public bool clearOnSubmit = true;
 
         [Header("Events")]
         public UnityEvent onSubmit;
 
         // Hidden variables
+        private float cachedDuration = 0.5f;
         private string inAnim = "In";
         private string outAnim = "Out";
         private string instaInAnim = "Instant In";
@@ -36,18 +38,17 @@ namespace Michsky.UI.ModernUIPack
 
             inputText.onSelect.AddListener(delegate { AnimateIn(); });
             inputText.onEndEdit.AddListener(delegate { AnimateOut(); });
+
             UpdateStateInstant();
         }
 
         void OnEnable()
         {
-            if (inputText == null)
-                return;
+            if (inputText == null) { return; }
+            if (gameObject.activeInHierarchy == true) { StartCoroutine("DisableAnimator"); }
 
             inputText.ForceLabelUpdate();
             UpdateStateInstant();
-
-            if (gameObject.activeInHierarchy == true) { StartCoroutine("DisableAnimator"); }
         }
 
         void Update()
@@ -58,31 +59,35 @@ namespace Michsky.UI.ModernUIPack
             { return; }
 
 #if ENABLE_LEGACY_INPUT_MANAGER
-            if (Input.GetKeyDown(KeyCode.Return)) { onSubmit.Invoke(); inputText.text = ""; }
+            if (Input.GetKeyDown(KeyCode.Return)) { onSubmit.Invoke(); if (clearOnSubmit == true) { inputText.text = ""; } }
 #elif ENABLE_INPUT_SYSTEM
-            if (Keyboard.current.enterKey.wasPressedThisFrame) { onSubmit.Invoke(); }
+            if (Keyboard.current.enterKey.wasPressedThisFrame) { onSubmit.Invoke(); if (clearOnSubmit == true) { inputText.text = ""; } }
 #endif
         }
 
         public void AnimateIn() 
-        {
-            StopCoroutine("DisableAnimator");
-         
-            if (inputFieldAnimator.gameObject.activeInHierarchy == true) 
+        {      
+            if (inputFieldAnimator.gameObject.activeInHierarchy == true && !inputFieldAnimator.GetCurrentAnimatorStateInfo(0).IsName(instaInAnim)) 
             {
+                StopCoroutine("DisableAnimator");
+                StartCoroutine("DisableAnimator");
+
                 inputFieldAnimator.enabled = true;
                 inputFieldAnimator.Play(inAnim);
-                StartCoroutine("DisableAnimator");
             }
         }
 
         public void AnimateOut()
         {
+            StopCoroutine("DisableAnimator");
+
             if (inputFieldAnimator.gameObject.activeInHierarchy == true)
             {
-                inputFieldAnimator.enabled = true;
-                if (inputText.text.Length == 0) { inputFieldAnimator.Play(outAnim); }
+                StopCoroutine("DisableAnimator");
                 StartCoroutine("DisableAnimator");
+
+                inputFieldAnimator.enabled = true;
+                if (inputText.text.Length == 0) { inputFieldAnimator.Play(outAnim); }     
             }
         }
 
@@ -94,13 +99,18 @@ namespace Michsky.UI.ModernUIPack
 
         public void UpdateStateInstant()
         {
+            inputFieldAnimator.enabled = true;
+
+            StopCoroutine("DisableAnimator");
+            StartCoroutine("DisableAnimator");
+
             if (inputText.text.Length == 0) { inputFieldAnimator.Play(instaOutAnim); }
             else { inputFieldAnimator.Play(instaInAnim); }
         }
 
         IEnumerator DisableAnimator()
         {
-            yield return new WaitForSeconds(1);
+            yield return new WaitForSecondsRealtime(cachedDuration);
             inputFieldAnimator.enabled = false;
         }
     }

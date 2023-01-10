@@ -4,8 +4,9 @@ using UnityEngine.UI;
 using UnityEngine.Events;
 using TMPro;
 
-namespace Michsky.UI.ModernUIPack
+namespace Michsky.MUIP
 {
+    [DisallowMultipleComponent]
     [RequireComponent(typeof(Animator))]
     public class NotificationManager : MonoBehaviour
     {
@@ -40,12 +41,9 @@ namespace Michsky.UI.ModernUIPack
         {
             isOn = false;
 
-            if (useCustomContent == false)
-            {
-                try { UpdateUI(); }
-                catch { Debug.LogError("<b>[Notification]</b> Cannot initalize the object due to missing components.", this); }
-            }
-
+            if (useCustomContent == false) { UpdateUI(); }
+            if (notificationAnimator == null) { notificationAnimator = gameObject.GetComponent<Animator>(); }
+            if (startBehaviour == StartBehaviour.Disable) { gameObject.SetActive(false); }
             if (useStacking == true)
             {
                 try
@@ -57,12 +55,9 @@ namespace Michsky.UI.ModernUIPack
 
                 catch { Debug.LogError("<b>[Notification]</b> 'Stacking' is enabled but 'Notification Stacking' cannot be found in parent.", this); }
             }
-
-            if (notificationAnimator == null) { notificationAnimator = gameObject.GetComponent<Animator>(); }
-            if (startBehaviour == StartBehaviour.Disable) { gameObject.SetActive(false); }
         }
 
-        public void OpenNotification()
+        public void Open()
         {
             if (isOn == true)
                 return;
@@ -79,7 +74,7 @@ namespace Michsky.UI.ModernUIPack
             if (enableTimer == true) { StartCoroutine("StartTimer"); }
         }
 
-        public void CloseNotification()
+        public void Close()
         {
             if (isOn == false)
                 return;
@@ -91,16 +86,15 @@ namespace Michsky.UI.ModernUIPack
             StartCoroutine("DisableNotification");
         }
 
+        // Obsolete
+        public void OpenNotification() { Open(); }
+        public void CloseNotification() { Close(); }
+
         public void UpdateUI()
         {
-            try
-            {
-                iconObj.sprite = icon;
-                titleObj.text = title;
-                descriptionObj.text = description;
-            }
-
-            catch { Debug.LogError("<b>[Notification]</b> Cannot update the component due to missing variables.", this); }
+            if (iconObj != null) { iconObj.sprite = icon; }
+            if (titleObj != null) { titleObj.text = title; }
+            if (descriptionObj != null) { descriptionObj.text = description; }
         }
 
         IEnumerator StartTimer()

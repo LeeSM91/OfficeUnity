@@ -4,7 +4,7 @@ using UnityEngine.UI;
 using UnityEngine.InputSystem;
 #endif
 
-namespace Michsky.UI.ModernUIPack
+namespace Michsky.MUIP
 {
     public class TooltipManager : MonoBehaviour
     {

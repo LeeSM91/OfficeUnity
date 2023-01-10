@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace Michsky.UI.ModernUIPack
+namespace Michsky.MUIP
 {
     [RequireComponent(typeof(Animator))]
     public class WindowManagerButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
@@ -9,10 +9,10 @@ namespace Michsky.UI.ModernUIPack
         public bool enableMobileMode = false;
         [HideInInspector] public Animator buttonAnimator;
 
-        void OnEnable()
+        void Awake()
         {
-            if (buttonAnimator == null)
-                buttonAnimator = gameObject.GetComponent<Animator>();
+            if (buttonAnimator == null) { buttonAnimator = gameObject.GetComponent<Animator>(); }
+            if (Application.platform == RuntimePlatform.IPhonePlayer || Application.platform == RuntimePlatform.Android) { enableMobileMode = true; }
         }
 
         public void OnPointerEnter(PointerEventData eventData)

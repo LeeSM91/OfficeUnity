@@ -2,15 +2,15 @@
 using UnityEngine.UI;
 using TMPro;
 
-namespace Michsky.UI.ModernUIPack
+namespace Michsky.MUIP
 {
     [ExecuteInEditMode]
     public class UIManagerProgressBar : MonoBehaviour
     {
         [Header("Settings")]
         [SerializeField] private UIManager UIManagerAsset;
-        public bool overrideColors = false;
-        public bool overrideFonts = false;
+        [HideInInspector] public bool overrideColors = false;
+        [HideInInspector] public bool overrideFonts = false;
 
         [Header("Resources")]
         [SerializeField] private Image bar;
@@ -21,51 +21,37 @@ namespace Michsky.UI.ModernUIPack
 
         void Awake()
         {
-            try
+            if (UIManagerAsset == null) { UIManagerAsset = Resources.Load<UIManager>("MUIP Manager"); }
+
+            this.enabled = true;
+
+            if (UIManagerAsset.enableDynamicUpdate == false)
             {
-                if (UIManagerAsset == null)
-                    UIManagerAsset = Resources.Load<UIManager>("MUIP Manager");
-
-                this.enabled = true;
-
-                if (UIManagerAsset.enableDynamicUpdate == false)
-                {
-                    UpdateProgressBar();
-                    this.enabled = false;
-                }
+                UpdateProgressBar();
+                this.enabled = false;
             }
-
-            catch { Debug.Log("<b>[Modern UI Pack]</b> No UI Manager found, assign it manually.", this); }
         }
 
-        void LateUpdate()
+        void Update()
         {
-            if (UIManagerAsset == null)
-                return;
-
-            if (UIManagerAsset.enableDynamicUpdate == true)
-                UpdateProgressBar();
+            if (UIManagerAsset == null) { return; }
+            if (UIManagerAsset.enableDynamicUpdate == true) { UpdateProgressBar(); }
         }
 
         void UpdateProgressBar()
         {
-            try
+            if (overrideColors == false)
             {
-                if (overrideColors == false)
-                {
-                    bar.color = UIManagerAsset.progressBarColor;
-                    background.color = UIManagerAsset.progressBarBackgroundColor;
-                    label.color = UIManagerAsset.progressBarLabelColor;
-                }
-
-                if (overrideFonts == false)
-                {
-                    label.font = UIManagerAsset.progressBarLabelFont;
-                    label.fontSize = UIManagerAsset.progressBarLabelFontSize;
-                }
+                bar.color = UIManagerAsset.progressBarColor;
+                background.color = UIManagerAsset.progressBarBackgroundColor;
+                label.color = UIManagerAsset.progressBarLabelColor;
             }
 
-            catch { }
+            if (overrideFonts == false)
+            {
+                label.font = UIManagerAsset.progressBarLabelFont;
+                label.fontSize = UIManagerAsset.progressBarLabelFontSize;
+            }
         }
     }
 }

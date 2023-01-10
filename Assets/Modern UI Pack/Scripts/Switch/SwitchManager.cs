@@ -4,13 +4,14 @@ using UnityEngine.UI;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 
-namespace Michsky.UI.ModernUIPack
+namespace Michsky.MUIP
 {
     [RequireComponent(typeof(Animator))]
     [RequireComponent(typeof(Button))]
     public class SwitchManager : MonoBehaviour, IPointerEnterHandler
     {
         // Events
+        [SerializeField] public SwitchEvent onValueChanged = new SwitchEvent();
         public UnityEvent OnEvents;
         public UnityEvent OffEvents;
 
@@ -34,6 +35,11 @@ namespace Michsky.UI.ModernUIPack
         public AudioClip hoverSound;
         public AudioClip clickSound;
 
+        [System.Serializable]
+        public class SwitchEvent : UnityEvent<bool> { }
+
+        bool isInitialized = false;
+
         void Awake()
         {
             if (switchAnimator == null) { switchAnimator = gameObject.GetComponent<Animator>(); }
@@ -54,27 +60,29 @@ namespace Michsky.UI.ModernUIPack
             if (saveValue == true) { GetSavedData(); }
             else
             {
-                StopCoroutine("DisableAnimator");
+                if (gameObject.activeInHierarchy == true) { StopCoroutine("DisableAnimator"); }
+                if (gameObject.activeInHierarchy == true) { StartCoroutine("DisableAnimator"); }
+
                 switchAnimator.enabled = true;
 
                 if (isOn == true) { switchAnimator.Play("On Instant"); }
                 else { switchAnimator.Play("Off Instant"); }
-
-                StartCoroutine("DisableAnimator");
             }
 
             if (invokeAtStart == true && isOn == true) { OnEvents.Invoke(); }
             else if (invokeAtStart == true && isOn == false) { OffEvents.Invoke(); }
+
+            isInitialized = true;
         }
 
-        void OnDisable()
-        {
-            StopCoroutine("DisableAnimator");
-        }
+        void OnEnable() { if (isInitialized == true) { UpdateUI(); } }
+        void OnDisable() { StopCoroutine("DisableAnimator"); }
 
         void GetSavedData()
         {
-            StopCoroutine("DisableAnimator");
+            if (gameObject.activeInHierarchy == true) { StopCoroutine("DisableAnimator"); }
+            if (gameObject.activeInHierarchy == true) { StartCoroutine("DisableAnimator"); }
+
             switchAnimator.enabled = true;
 
             if (PlayerPrefs.GetString(switchTag + "Switch") == "" || PlayerPrefs.HasKey(switchTag + "Switch") == false)
@@ -84,13 +92,13 @@ namespace Michsky.UI.ModernUIPack
             }
             else if (PlayerPrefs.GetString(switchTag + "Switch") == "true") { switchAnimator.Play("Switch On"); isOn = true; }
             else if (PlayerPrefs.GetString(switchTag + "Switch") == "false") { switchAnimator.Play("Switch Off"); isOn = false; }
-
-            StartCoroutine("DisableAnimator");
         }
 
         public void AnimateSwitch()
         {
-            StopCoroutine("DisableAnimator");
+            if (gameObject.activeInHierarchy == true) { StopCoroutine("DisableAnimator"); }
+            if (gameObject.activeInHierarchy == true) { StartCoroutine("DisableAnimator"); }
+
             switchAnimator.enabled = true;
 
             if (isOn == true)
@@ -111,18 +119,44 @@ namespace Michsky.UI.ModernUIPack
                 if (saveValue == true) { PlayerPrefs.SetString(switchTag + "Switch", "true"); }
             }
 
-            StartCoroutine("DisableAnimator");
+            onValueChanged.Invoke(isOn);
+        }
+
+        public void SetOn()
+        {
+            if (gameObject.activeInHierarchy == true) { StopCoroutine("DisableAnimator"); }
+            if (gameObject.activeInHierarchy == true) { StartCoroutine("DisableAnimator"); }
+            if (saveValue == true) { PlayerPrefs.SetString(switchTag + "Switch", "true"); }
+
+            switchAnimator.enabled = true;
+            switchAnimator.Play("Switch On");
+            isOn = true;
+            OnEvents.Invoke();
+            onValueChanged.Invoke(true);
+        }
+
+        public void SetOff()
+        {
+            if (gameObject.activeInHierarchy == true) { StopCoroutine("DisableAnimator"); }
+            if (gameObject.activeInHierarchy == true) { StartCoroutine("DisableAnimator"); }
+            if (saveValue == true) { PlayerPrefs.SetString(switchTag + "Switch", "false"); }
+
+            switchAnimator.enabled = true;
+            switchAnimator.Play("Switch Off");
+            isOn = false;
+            OffEvents.Invoke();
+            onValueChanged.Invoke(false);
         }
 
         public void UpdateUI()
         {
-            StopCoroutine("DisableAnimator");
+            if (gameObject.activeInHierarchy == true) { StopCoroutine("DisableAnimator"); }
+            if (gameObject.activeInHierarchy == true) { StartCoroutine("DisableAnimator"); }
+
             switchAnimator.enabled = true;
 
-            if (isOn == true && switchAnimator.gameObject.activeInHierarchy == true) { switchAnimator.Play("Switch On"); }
-            else if (isOn == false && switchAnimator.gameObject.activeInHierarchy == true) { switchAnimator.Play("Switch Off"); }
-
-            StartCoroutine("DisableAnimator");
+            if (isOn == true && switchAnimator.gameObject.activeInHierarchy == true) { switchAnimator.Play("On Instant"); }
+            else if (isOn == false && switchAnimator.gameObject.activeInHierarchy == true) { switchAnimator.Play("Off Instant"); }
         }
 
         public void OnPointerEnter(PointerEventData eventData)

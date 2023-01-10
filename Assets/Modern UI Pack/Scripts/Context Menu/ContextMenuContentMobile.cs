@@ -6,7 +6,7 @@ using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using TMPro;
 
-namespace Michsky.UI.ModernUIPack
+namespace Michsky.MUIP
 {
     [AddComponentMenu("Modern UI Pack/Context Menu/Context Menu Content (Mobile)")]
     public class ContextMenuContentMobile : MonoBehaviour, IPointerDownHandler, IPointerUpHandler

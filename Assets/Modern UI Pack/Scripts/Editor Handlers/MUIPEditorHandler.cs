@@ -2,19 +2,21 @@
 using UnityEngine;
 using UnityEditor;
 
-namespace Michsky.UI.ModernUIPack
+namespace Michsky.MUIP
 {
     public class MUIPEditorHandler : Editor
     {
         public static GUISkin GetDarkEditor(GUISkin tempSkin)
         {
-            tempSkin = (GUISkin)Resources.Load("MUI Skin Dark");
+            tempSkin = (GUISkin)Resources.Load("MUIP-EditorDark");
+            if (tempSkin == null) { tempSkin = (GUISkin)Resources.Load("MUI Skin Dark"); }
             return tempSkin;
         }
 
         public static GUISkin GetLightEditor(GUISkin tempSkin)
         {
-            tempSkin = (GUISkin)Resources.Load("MUI Skin Light");
+            tempSkin = (GUISkin)Resources.Load("MUIP-EditorLight");
+            if (tempSkin == null) { tempSkin = (GUISkin)Resources.Load("MUI Skin Light"); }
             return tempSkin;
         }
 
@@ -117,8 +119,8 @@ namespace Michsky.UI.ModernUIPack
 
         public static void DrawUIManagerPresetHeader()
         {
-            EditorGUILayout.HelpBox("This object is subject to a preset and cannot be used with the UI Manager. " +
-                                         "You can use the standard object for UI Manager connection.", MessageType.Info);
+            EditorGUILayout.HelpBox("This object is subject to a custom preset and cannot be used with the UI Manager. " +
+                                         "You can use the standard preset for UI Manager connection.", MessageType.Info);
         }
 
         public static void DrawUIManagerDisconnectedHeader()

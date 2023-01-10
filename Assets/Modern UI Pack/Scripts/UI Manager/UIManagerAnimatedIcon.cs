@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Michsky.UI.ModernUIPack
+namespace Michsky.MUIP
 {
     [ExecuteInEditMode]
     public class UIManagerAnimatedIcon : MonoBehaviour
@@ -16,42 +16,39 @@ namespace Michsky.UI.ModernUIPack
 
         void Awake()
         {
-            try
+            if (UIManagerAsset == null) { UIManagerAsset = Resources.Load<UIManager>("MUIP Manager"); }
+
+            this.enabled = true;
+
+            if (UIManagerAsset.enableDynamicUpdate == false)
             {
-                if (UIManagerAsset == null)
-                    UIManagerAsset = Resources.Load<UIManager>("MUIP Manager");
-
-                this.enabled = true;
-
-                if (UIManagerAsset.enableDynamicUpdate == false)
-                {
-                    UpdateAnimatedIcon();
-                    this.enabled = false;
-                }
+                UpdateAnimatedIcon();
+                this.enabled = false;
             }
-
-            catch { Debug.Log("<b>[Modern UI Pack]</b> No UI Manager found, assign it manually.", this); }
         }
 
-        void LateUpdate()
+        void Update()
         {
-            if (UIManagerAsset == null)
-                return;
-
-            if (UIManagerAsset.enableDynamicUpdate == true)
-                UpdateAnimatedIcon();
+            if (UIManagerAsset == null) { return; }
+            if (UIManagerAsset.enableDynamicUpdate == true) { UpdateAnimatedIcon(); }
         }
 
         void UpdateAnimatedIcon()
         {
             for (int i = 0; i < images.Count; ++i)
             {
+                if (images[i] == null)
+                    continue;
+
                 Image currentImage = images[i].GetComponent<Image>();
                 currentImage.color = UIManagerAsset.animatedIconColor;
             }
 
             for (int i = 0; i < imagesWithAlpha.Count; ++i)
             {
+                if (imagesWithAlpha[i] == null)
+                    continue;
+
                 Image currentAlphaImage = imagesWithAlpha[i].GetComponent<Image>();
                 currentAlphaImage.color = new Color(UIManagerAsset.animatedIconColor.r, UIManagerAsset.animatedIconColor.g, UIManagerAsset.animatedIconColor.b, currentAlphaImage.color.a);
             }

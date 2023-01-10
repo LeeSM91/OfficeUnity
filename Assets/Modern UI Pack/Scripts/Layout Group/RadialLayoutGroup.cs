@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Michsky.UI.ModernUIPack
+namespace Michsky.MUIP
 {
     [AddComponentMenu("Modern UI Pack/Layout Group/Radial Layout Group")]
     public class RadialLayoutGroup : LayoutGroup

@@ -4,7 +4,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using TMPro;
 
-namespace Michsky.UI.ModernUIPack
+namespace Michsky.MUIP
 {
     public class RadialSlider : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDragHandler, IPointerEnterHandler, IPointerExitHandler
     {
@@ -33,7 +33,7 @@ namespace Michsky.UI.ModernUIPack
         [System.Serializable]
         public class SliderEvent : UnityEvent<float> { }
         [SerializeField]
-        private SliderEvent onValueChanged = new SliderEvent();
+        public SliderEvent onValueChanged = new SliderEvent();
         public UnityEvent onPointerEnter;
         public UnityEvent onPointerExit;
 

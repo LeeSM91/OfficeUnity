@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Events;
+using UnityEngine.EventSystems;
 
-namespace Michsky.UI.ModernUIPack
+namespace Michsky.MUIP
 {
     public class WindowManager : MonoBehaviour
     {
@@ -33,11 +34,13 @@ namespace Michsky.UI.ModernUIPack
         private Animator currentButtonAnimator;
         private Animator nextButtonAnimator;
 
-        // Animation states
+        // Helpers
         string windowFadeIn = "In";
         string windowFadeOut = "Out";
-        string buttonFadeIn = "Normal to Pressed";
+        string buttonFadeIn = "Hover to Pressed";
         string buttonFadeOut = "Pressed to Normal";
+        float cachedStateLength;
+        public bool altMode;
 
         [System.Serializable]
         public class WindowItem
@@ -45,6 +48,7 @@ namespace Michsky.UI.ModernUIPack
             public string windowName = "My Window";
             public GameObject windowObject;
             public GameObject buttonObject;
+            public GameObject firstSelected;
         }
 
         void Awake()
@@ -72,6 +76,7 @@ namespace Michsky.UI.ModernUIPack
 
         public void InitializeWindows()
         {
+            if (windows[currentWindowIndex].firstSelected != null) { EventSystem.current.firstSelectedGameObject = windows[currentWindowIndex].firstSelected; }
             if (windows[currentWindowIndex].buttonObject != null)
             {
                 currentButton = windows[currentWindowIndex].buttonObject;
@@ -84,6 +89,9 @@ namespace Michsky.UI.ModernUIPack
             currentWindowAnimator.Play(windowFadeIn);
             onWindowChange.Invoke(currentWindowIndex);
 
+            if (altMode == true) { cachedStateLength = 0.3f; }
+            else { cachedStateLength = MUIPInternalTools.GetAnimatorClipLength(currentWindowAnimator, MUIPInternalTools.windowManagerStateName); }
+
             isInitialized = true;
 
             for (int i = 0; i < windows.Count; i++)
@@ -92,9 +100,13 @@ namespace Michsky.UI.ModernUIPack
                 if (windows[i].buttonObject != null && initializeButtons == true)
                 {
                     string tempName = windows[i].windowName;
-                    Button tempButton = windows[i].buttonObject.GetComponent<Button>();
-                    tempButton.onClick.RemoveAllListeners();
-                    tempButton.onClick.AddListener(() => OpenPanel(tempName));
+                    ButtonManager tempButton = windows[i].buttonObject.GetComponent<ButtonManager>();
+
+                    if (tempButton != null)
+                    {
+                        tempButton.onClick.RemoveAllListeners();
+                        tempButton.onClick.AddListener(() => OpenPanel(tempName));
+                    }
                 }
             }
         }
@@ -121,6 +133,7 @@ namespace Michsky.UI.ModernUIPack
                 currentWindowAnimator = currentWindow.GetComponent<Animator>();
                 currentWindowAnimator.Play(windowFadeIn);
 
+                if (windows[currentWindowIndex].firstSelected != null) { EventSystem.current.firstSelectedGameObject = windows[currentWindowIndex].firstSelected; }
                 if (windows[currentButtonIndex].buttonObject != null)
                 {
                     currentButton = windows[currentButtonIndex].buttonObject;
@@ -137,6 +150,7 @@ namespace Michsky.UI.ModernUIPack
                 currentWindowAnimator = currentWindow.GetComponent<Animator>();
                 currentWindowAnimator.Play(windowFadeIn);
 
+                if (windows[currentWindowIndex].firstSelected != null) { EventSystem.current.firstSelectedGameObject = windows[currentWindowIndex].firstSelected; }
                 if (windows[currentButtonIndex].buttonObject != null)
                 {
                     currentButton = windows[currentButtonIndex].buttonObject;
@@ -182,6 +196,7 @@ namespace Michsky.UI.ModernUIPack
 
                 currentButtonIndex = newWindowIndex;
 
+                if (windows[currentWindowIndex].firstSelected != null) { EventSystem.current.firstSelectedGameObject = windows[currentWindowIndex].firstSelected; }
                 if (windows[currentButtonIndex].buttonObject != null)
                 {
                     nextButton = windows[currentButtonIndex].buttonObject;
@@ -246,9 +261,8 @@ namespace Michsky.UI.ModernUIPack
                 nextWindowAnimator = nextWindow.GetComponent<Animator>();
                 nextWindowAnimator.Play(windowFadeIn);
 
-                if (cullWindows == true)
-                    StartCoroutine("DisablePreviousWindow");
-
+                if (cullWindows == true) { StartCoroutine("DisablePreviousWindow"); }
+                if (windows[currentWindowIndex].firstSelected != null) { EventSystem.current.firstSelectedGameObject = windows[currentWindowIndex].firstSelected; }
                 if (nextButton != null)
                 {
                     nextButtonAnimator = nextButton.GetComponent<Animator>();
@@ -290,9 +304,8 @@ namespace Michsky.UI.ModernUIPack
                 nextWindowAnimator = nextWindow.GetComponent<Animator>();
                 nextWindowAnimator.Play(windowFadeIn);
 
-                if (cullWindows == true)
-                    StartCoroutine("DisablePreviousWindow");
-
+                if (cullWindows == true) { StartCoroutine("DisablePreviousWindow"); }
+                if (windows[currentWindowIndex].firstSelected != null) { EventSystem.current.firstSelectedGameObject = windows[currentWindowIndex].firstSelected; }
                 if (nextButton != null)
                 {
                     nextButtonAnimator = nextButton.GetComponent<Animator>();
@@ -361,7 +374,7 @@ namespace Michsky.UI.ModernUIPack
 
         IEnumerator DisablePreviousWindow()
         {
-            yield return new WaitForSeconds(0.4f);
+            yield return new WaitForSecondsRealtime(cachedStateLength);
 
             for (int i = 0; i < windows.Count; i++)
             {

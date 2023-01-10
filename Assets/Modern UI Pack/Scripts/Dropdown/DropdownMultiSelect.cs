@@ -5,9 +5,9 @@ using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using TMPro;
 
-namespace Michsky.UI.ModernUIPack
+namespace Michsky.MUIP
 {
-    public class DropdownMultiSelect : MonoBehaviour, IPointerExitHandler
+    public class DropdownMultiSelect : MonoBehaviour, IPointerExitHandler, IPointerClickHandler
     {
         // Resources
         public GameObject triggerObject;
@@ -21,6 +21,7 @@ namespace Michsky.UI.ModernUIPack
         public TextMeshProUGUI setItemText;
 
         // Settings
+        public bool isInteractable = true;
         public bool initAtStart = true;
         public bool enableIcon = true;
         public bool enableTrigger = true;
@@ -28,6 +29,7 @@ namespace Michsky.UI.ModernUIPack
         public bool setHighPriorty = true;
         public bool outOnPointerExit = false;
         public bool isListItem = false;
+        public bool invokeAtStart = false;
         [Range(1, 50)] public int itemPaddingTop = 8;
         [Range(1, 50)] public int itemPaddingBottom = 8;
         [Range(1, 50)] public int itemPaddingLeft = 8;
@@ -44,15 +46,12 @@ namespace Michsky.UI.ModernUIPack
         bool isInTransition = false;
         float closeOn;
 
-        // Saving
-        public bool invokeAtStart = false;
-        public string toggleTag = "Multi Dropdown";
-
         // Items
         [SerializeField]
-        public List<Item> dropdownItems = new List<Item>();
+        public List<Item> items = new List<Item>();
 
         // Other variables
+        bool isInitialized = false;
         int currentIndex;
         Toggle currentToggle;
         string textHelper;
@@ -76,39 +75,36 @@ namespace Michsky.UI.ModernUIPack
 
         void OnEnable()
         {
-            if (animationType == AnimationType.Stylish) { return; }
-            else if (animationType == AnimationType.Modular && dropdownAnimator != null) { Destroy(dropdownAnimator); }
-
-            if (listCG == null) { listCG = gameObject.GetComponentInChildren<CanvasGroup>(); }
-            listCG.alpha = 0;
-            listCG.interactable = false;
-            listCG.blocksRaycasts = false;
-
-            if (listRect == null) { listRect = listCG.GetComponent<RectTransform>(); }
-            closeOn = gameObject.GetComponent<RectTransform>().sizeDelta.y;
-            listRect.sizeDelta = new Vector2(listRect.sizeDelta.x, closeOn);
+            if (isInitialized == false) { Initialize(); }
+            if (animationType == AnimationType.Modular)
+            {
+                listCG.alpha = 0;
+                listCG.interactable = false;
+                listCG.blocksRaycasts = false;
+                listRect.sizeDelta = new Vector2(listRect.sizeDelta.x, closeOn);
+            }
         }
 
-        void Awake()
+        void Initialize()
         {
-            try
+            if (listCG == null) { listCG = gameObject.GetComponentInChildren<CanvasGroup>(); }
+            if (listRect == null) { listRect = listCG.GetComponent<RectTransform>(); }
+            if (initAtStart == true) { SetupDropdown(); }
+            if (animationType == AnimationType.Modular && dropdownAnimator != null) { Destroy(dropdownAnimator); }
+
+            if (enableTrigger == true && triggerObject != null)
             {
-                if (initAtStart == true) { SetupDropdown(); }
-
-                currentListParent = transform.parent;
-
-                if (enableTrigger == true && triggerObject != null)
-                {
-                    // triggerButton = gameObject.GetComponent<Button>();
-                    triggerEvent = triggerObject.AddComponent<EventTrigger>();
-                    EventTrigger.Entry entry = new EventTrigger.Entry();
-                    entry.eventID = EventTriggerType.PointerClick;
-                    entry.callback.AddListener((eventData) => { Animate(); });
-                    triggerEvent.GetComponent<EventTrigger>().triggers.Add(entry);
-                }
+                // triggerButton = gameObject.GetComponent<Button>();
+                triggerEvent = triggerObject.AddComponent<EventTrigger>();
+                EventTrigger.Entry entry = new EventTrigger.Entry();
+                entry.eventID = EventTriggerType.PointerClick;
+                entry.callback.AddListener((eventData) => { Animate(); });
+                triggerEvent.GetComponent<EventTrigger>().triggers.Add(entry);
             }
 
-            catch { Debug.LogError("<b>[Dropdown]</b> Cannot initalize the object due to missing resources.", this); }
+            currentListParent = transform.parent;
+            closeOn = gameObject.GetComponent<RectTransform>().sizeDelta.y;
+            isInitialized = true;
         }
 
         void Update()
@@ -134,7 +130,7 @@ namespace Michsky.UI.ModernUIPack
                 listCG.alpha -= Time.unscaledDeltaTime * transitionSmoothness;
                 listRect.sizeDelta = Vector2.Lerp(listRect.sizeDelta, new Vector2(listRect.sizeDelta.x, closeOn), Time.unscaledDeltaTime * sizeSmoothness);
 
-                if (listRect.sizeDelta.y <= closeOn + 0.1f && listCG.alpha <= 0) { isInTransition = false; this.enabled = false; }
+                if (listRect.sizeDelta.y <= closeOn + 0.1f && listCG.alpha <= 0) { isInTransition = false; }
             }
         }
 
@@ -147,33 +143,31 @@ namespace Michsky.UI.ModernUIPack
 
             UpdateItemLayout();
 
-            foreach (Transform child in itemParent)
-                Destroy(child.gameObject);
-
-            for (int i = 0; i < dropdownItems.Count; ++i)
+            foreach (Transform child in itemParent) { Destroy(child.gameObject); }
+            for (int i = 0; i < items.Count; ++i)
             {
                 GameObject go = Instantiate(itemObject, new Vector3(0, 0, 0), Quaternion.identity) as GameObject;
                 go.transform.SetParent(itemParent, false);
 
                 setItemText = go.GetComponentInChildren<TextMeshProUGUI>();
-                textHelper = dropdownItems[i].itemName;
+                textHelper = items[i].itemName;
                 setItemText.text = textHelper;
 
-                dropdownItems[i].itemIndex = i;
-                DropdownMultiSelect.Item mainItem = dropdownItems[i];
+                items[i].itemIndex = i;
+                DropdownMultiSelect.Item mainItem = items[i];
 
                 Toggle itemToggle = go.GetComponent<Toggle>();
                 itemToggle.onValueChanged.AddListener(delegate { UpdateToggleData(mainItem.itemIndex); });
                 itemToggle.onValueChanged.AddListener(UpdateToggle);
-                itemToggle.onValueChanged.AddListener(dropdownItems[i].onValueChanged.Invoke);
+                itemToggle.onValueChanged.AddListener(items[i].onValueChanged.Invoke);
 
-                if (dropdownItems[i].isOn == true) { itemToggle.isOn = true; }
+                if (items[i].isOn == true) { itemToggle.isOn = true; }
                 else { itemToggle.isOn = false; }
 
                 if (invokeAtStart == true)
                 {
-                    if (dropdownItems[i].isOn == true) { dropdownItems[i].onValueChanged.Invoke(true); }
-                    else { dropdownItems[i].onValueChanged.Invoke(false); }
+                    if (items[i].isOn == true) { items[i].onValueChanged.Invoke(true); }
+                    else { items[i].onValueChanged.Invoke(false); }
                 }
             }
 
@@ -182,8 +176,8 @@ namespace Michsky.UI.ModernUIPack
 
         void UpdateToggle(bool value)
         {
-            if (value == true) { currentToggle.isOn = true; dropdownItems[currentIndex].isOn = true; }
-            else { currentToggle.isOn = false; dropdownItems[currentIndex].isOn = false; }
+            if (value == true) { currentToggle.isOn = true; items[currentIndex].isOn = true; }
+            else { currentToggle.isOn = false; items[currentIndex].isOn = false; }
         }
 
         void UpdateToggleData(int itemIndex)
@@ -255,34 +249,36 @@ namespace Michsky.UI.ModernUIPack
             if (setHighPriorty == true) { transform.SetAsLastSibling(); }
         }
 
+        public void CreateNewItem(string title, bool value, bool notify)
+        {
+            Item item = new Item();
+            item.itemName = title;
+            item.isOn = value;
+            items.Add(item);
+            if (notify == true) { SetupDropdown(); }
+        }
+
         public void CreateNewItem(string title, bool value)
         {
             Item item = new Item();
             item.itemName = title;
             item.isOn = value;
-            dropdownItems.Add(item);
-            SetupDropdown();
+            items.Add(item);
+            SetupDropdown();     
         }
 
-        public void CreateNewItemFast(string title, bool value)
+        public void CreateNewItem(string title)
         {
             Item item = new Item();
             item.itemName = title;
-            item.isOn = value;
-            dropdownItems.Add(item);
+            items.Add(item);
         }
 
         public void RemoveItem(string itemTitle)
         {
-            var item = dropdownItems.Find(x => x.itemName == itemTitle);
-            dropdownItems.Remove(item);
+            var item = items.Find(x => x.itemName == itemTitle);
+            items.Remove(item);
             SetupDropdown();
-        }
-
-        public void AddNewItem()
-        {
-            Item item = new Item();
-            dropdownItems.Add(item);
         }
 
         public void UpdateItemLayout()
@@ -295,6 +291,12 @@ namespace Michsky.UI.ModernUIPack
                 itemList.padding.left = itemPaddingLeft;
                 itemList.padding.right = itemPaddingRight;
             }
+        }
+
+        public void OnPointerClick(PointerEventData eventData)
+        {
+            if (isInteractable == false) { return; }
+            Animate();
         }
 
         public void OnPointerExit(PointerEventData eventData)

@@ -2,7 +2,7 @@
 using UnityEngine.UI;
 using TMPro;
 
-namespace Michsky.UI.ModernUIPack
+namespace Michsky.MUIP
 {
     [ExecuteInEditMode]
     public class UIManagerDropdownItem : MonoBehaviour
@@ -19,69 +19,32 @@ namespace Michsky.UI.ModernUIPack
 
         void Awake()
         {
-            try
+            if (UIManagerAsset == null) { UIManagerAsset = Resources.Load<UIManager>("MUIP Manager"); }
+
+            this.enabled = true;
+
+            if (UIManagerAsset.enableDynamicUpdate == false)
             {
-                if (UIManagerAsset == null) { UIManagerAsset = Resources.Load<UIManager>("MUIP Manager"); }
-
-                this.enabled = true;
-
-                if (UIManagerAsset.enableDynamicUpdate == false)
-                {
-                    UpdateDropdown();
-                    this.enabled = false;
-                }
+                UpdateDropdown();
+                this.enabled = false;
             }
-
-            catch { Debug.Log("<b>[Modern UI Pack]</b> No UI Manager found, assign it manually.", this); }
         }
 
-        void LateUpdate()
+        void Update()
         {
-            if (UIManagerAsset == null)
-                return;
-
-            if (UIManagerAsset.enableDynamicUpdate == true)
-                UpdateDropdown();
+            if (UIManagerAsset == null) { return; }
+            if (UIManagerAsset.enableDynamicUpdate == true) { UpdateDropdown(); }
         }
 
         void UpdateDropdown()
         {
-            try
+            if (overrideFonts == false && itemText != null) { itemText.font = UIManagerAsset.dropdownItemFont; }
+            if (overrideColors == false)
             {
-                if (UIManagerAsset.buttonThemeType == UIManager.ButtonThemeType.Basic)
-                {
-                    if (overrideColors == false)
-                    {
-                        itemBackground.color = UIManagerAsset.dropdownItemColor;
-                        itemIcon.color = UIManagerAsset.dropdownTextColor;
-                        itemText.color = UIManagerAsset.dropdownTextColor;
-                    }
-
-                    if (overrideFonts == false)
-                    {
-                        itemText.font = UIManagerAsset.dropdownFont;
-                        itemText.fontSize = UIManagerAsset.dropdownFontSize;
-                    }
-                }
-
-                else if (UIManagerAsset.buttonThemeType == UIManager.ButtonThemeType.Custom)
-                {
-                    if (overrideColors == false)
-                    {
-                        itemBackground.color = UIManagerAsset.dropdownItemColor;
-                        itemIcon.color = UIManagerAsset.dropdownItemIconColor;
-                        itemText.color = UIManagerAsset.dropdownItemTextColor;
-                    }
-
-                    if (overrideFonts == false)
-                    {
-                        itemText.font = UIManagerAsset.dropdownItemFont;
-                        itemText.fontSize = UIManagerAsset.dropdownItemFontSize;
-                    }
-                }
+                if (itemBackground != null) { itemBackground.color = UIManagerAsset.dropdownItemBackgroundColor; }
+                if (itemIcon != null) { itemIcon.color = UIManagerAsset.dropdownItemPrimaryColor; }
+                if (itemText != null) { itemText.color = UIManagerAsset.dropdownItemPrimaryColor; }
             }
-
-            catch { }
         }
     }
 }

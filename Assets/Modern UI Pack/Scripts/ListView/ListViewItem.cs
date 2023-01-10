@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Michsky.UI.ModernUIPack
+namespace Michsky.MUIP
 {
     public class ListViewItem : MonoBehaviour
     {

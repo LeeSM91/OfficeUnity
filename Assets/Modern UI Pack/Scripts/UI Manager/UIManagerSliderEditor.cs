@@ -4,7 +4,7 @@ using UnityEditor;
 using System;
 using TMPro;
 
-namespace Michsky.UI.ModernUIPack
+namespace Michsky.MUIP
 {
     [CustomEditor(typeof(UIManagerSlider))]
     public class UIManagerSliderEditor : Editor

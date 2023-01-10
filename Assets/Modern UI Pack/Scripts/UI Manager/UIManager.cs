@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using TMPro;
 
-namespace Michsky.UI.ModernUIPack
+namespace Michsky.MUIP
 {
     [CreateAssetMenu(fileName = "New UI Manager", menuName = "Modern UI Pack/New UI Manager")]
     public class UIManager : ScriptableObject
@@ -18,48 +18,32 @@ namespace Michsky.UI.ModernUIPack
         public Color contextBackgroundColor = new Color(255, 255, 255, 255);
 
         // Button
-        public ButtonThemeType buttonThemeType;
         public TMP_FontAsset buttonFont;
-        public float buttonFontSize = 22.5f;
-        public Color buttonBorderColor = new Color(255, 255, 255, 255);
-        public Color buttonFilledColor = new Color(255, 255, 255, 255);
-        public Color buttonTextBasicColor = new Color(255, 255, 255, 255);
-        public Color buttonTextColor = new Color(255, 255, 255, 255);
-        public Color buttonTextHighlightedColor = new Color(255, 255, 255, 255);
-        public Color buttonIconBasicColor = new Color(255, 255, 255, 255);
-        public Color buttonIconColor = new Color(255, 255, 255, 255);
-        public Color buttonIconHighlightedColor = new Color(255, 255, 255, 255);
+        public Color buttonNormalColor = new Color(255, 255, 255, 255);
+        public Color buttonAccentColor = new Color(255, 255, 255, 255);
+        [Range(0, 1)] public float buttonDisabledAlpha = 0.4f;
 
         // Dropdown
-        public TMP_FontAsset dropdownItemFont;
-        public float dropdownItemFontSize = 22.5f;
-        public DropdownThemeType dropdownThemeType;
         public TMP_FontAsset dropdownFont;
-        public float dropdownFontSize = 22.5f;
-        public Color dropdownColor = new Color(255, 255, 255, 255);
-        public Color dropdownTextColor = new Color(255, 255, 255, 255);
-        public Color dropdownIconColor = new Color(255, 255, 255, 255);
-        public Color dropdownItemColor = new Color(255, 255, 255, 255);
-        public Color dropdownItemTextColor = new Color(255, 255, 255, 255);
-        public Color dropdownItemIconColor = new Color(255, 255, 255, 255);
+        public TMP_FontAsset dropdownItemFont;
+        public Color dropdownBackgroundColor = new Color(255, 255, 255, 255);
+        public Color dropdownContentBackgroundColor = new Color(255, 255, 255, 255);
+        public Color dropdownPrimaryColor = new Color(255, 255, 255, 255);
+        public Color dropdownItemBackgroundColor = new Color(255, 255, 255, 255);
+        public Color dropdownItemPrimaryColor = new Color(255, 255, 255, 255);
 
         // Horizontal Selector
         public TMP_FontAsset selectorFont;
-        public float hSelectorFontSize = 28;
         public Color selectorColor = new Color(255, 255, 255, 255);
         public Color selectorHighlightedColor = new Color(255, 255, 255, 255);
-        public bool hSelectorInvertAnimation = false;
-        public bool hSelectorLoopSelection = false;
 
         // Input Field
         public TMP_FontAsset inputFieldFont;
-        public float inputFieldFontSize = 28;
         public Color inputFieldColor = new Color(255, 255, 255, 255);
 
         // Modal Window
         public TMP_FontAsset modalWindowTitleFont;
         public TMP_FontAsset modalWindowContentFont;
-        public DropdownThemeType modalThemeType;
         public Color modalWindowTitleColor = new Color(255, 255, 255, 255);
         public Color modalWindowDescriptionColor = new Color(255, 255, 255, 255);
         public Color modalWindowIconColor = new Color(255, 255, 255, 255);
@@ -91,7 +75,6 @@ namespace Michsky.UI.ModernUIPack
 
         // Slider
         public TMP_FontAsset sliderLabelFont;
-        public float sliderLabelFontSize = 24;
         public SliderThemeType sliderThemeType;
         public Color sliderColor = new Color(255, 255, 255, 255);
         public Color sliderBackgroundColor = new Color(255, 255, 255, 255);
@@ -107,7 +90,6 @@ namespace Michsky.UI.ModernUIPack
 
         // Toggle
         public TMP_FontAsset toggleFont;
-        public float toggleFontSize = 35;
         public ToggleThemeType toggleThemeType;
         public Color toggleTextColor = new Color(255, 255, 255, 255);
         public Color toggleBorderColor = new Color(255, 255, 255, 255);
@@ -120,8 +102,6 @@ namespace Michsky.UI.ModernUIPack
         public Color tooltipTextColor = new Color(255, 255, 255, 255);
         public Color tooltipBackgroundColor = new Color(255, 255, 255, 255);
 
-        public enum ButtonThemeType { Basic, Custom }
-        public enum DropdownThemeType { Basic, Custom }
         public enum ModalWindowThemeType { Basic, Custom }
         public enum NotificationThemeType { Basic, Custom }
         public enum SliderThemeType { Basic, Custom }
